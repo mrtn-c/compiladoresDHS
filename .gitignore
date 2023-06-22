@@ -7,5 +7,4 @@ compiladores*.java
 compiladores*.py
 *.out
 *.class
-*.jar
 *.tokens
