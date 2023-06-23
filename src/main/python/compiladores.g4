@@ -52,7 +52,7 @@ IIF: 'if';
 IELSE: 'else';
 IELSEIF: IELSE IIF;
 
-//				Definiciones para Switch
+//Definiciones para Switch
 ISWITCH: 'switch';
 CASE: 'case';
 DEFAULT: 'default';
@@ -61,10 +61,6 @@ DP: ':';
 //Estructuras de Repeticion
 IWHILE: 'while';
 IFOR: 'for';
-
-
-
-
 /// INICIO DE FUNCION Y CONTEXTOS ///
 programa: instrucciones EOF;
 
@@ -76,7 +72,7 @@ instruccion:
 	| llamadaFuncion PYC | asignarFuncion PYC;
 
 bloque:
-	LA instrucciones LC | LA instrucciones retorno PYC LC;
+	LA instrucciones retorno PYC LC | LA instrucciones LC ;
 
 retorno: RETORNO | RETORNO ID | RETORNO NUMERO | RETORNO oparitmetica;
 
@@ -148,12 +144,14 @@ bloqueElse: IELSE bloque;
 bloqueElseIf: bloqueIf IELSEIF control bloque (bloqueElse | bloqueElseIf) 
 | IELSEIF control bloque (bloqueElse | bloqueElseIf);
 
-bloqueSwitch: ISWITCH PA (expresion | valor) PC LA casos LC;
+bloqueSwitch: ISWITCH PA (valor | expresion) PC LA casos LC;
 
 casos: caso casos |;
 
+
+
 caso: CASE valor DP instrucciones BREAK PYC
-| CASE valor DP instrucciones BREAK PYC
+| CASE valor DP instrucciones
 | DEFAULT DP instrucciones;
 
 valor: NUMERO | TOF | ID;
@@ -189,7 +187,7 @@ decrementoUnario: ID DECREMENTO;
 
 //VARIABLES
 declaracion:
-	tdato ID | tdato init | tdato init declaracionConjunta | tdato ID declaracionConjunta;
+	tdato ID | tdato init | tdato init declaracionConjunta | tdato ID declaracionConjunta | tdato ID ASSIG valor;
 
 tdato: INT | FLOAT | DOUBLE | BOOL;
 
