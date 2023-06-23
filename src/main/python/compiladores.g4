@@ -50,6 +50,14 @@ TOF: 'true' | 'false';
 //Estructuras de Control
 IIF: 'if';
 IELSE: 'else';
+IELSEIF: IELSE IIF;
+
+//				Definiciones para Switch
+ISWITCH: 'switch';
+CASE: 'case';
+DEFAULT: 'default';
+BREAK: 'break';
+DP: ':';
 //Estructuras de Repeticion
 IWHILE: 'while';
 IFOR: 'for';
@@ -64,7 +72,7 @@ instrucciones: instruccion instrucciones |;
 
 instruccion:
 	bloque | declaracion PYC | asignacion PYC | incrementoUnario PYC | decrementoUnario PYC
-	| bloqueif | bloquewhile | bloquefor | prototipado PYC | funcion
+	| bloqueIf | bloqueWhile | bloquefor | bloqueSwitch | prototipado PYC | funcion
 	| llamadaFuncion PYC | asignarFuncion PYC;
 
 bloque:
@@ -129,14 +137,26 @@ bloquefor:
 	| IFOR PA PYC cmp PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque //sin asignacion/declaracion
 	| IFOR PA PYC PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque; //for(;;x++)
 
-bloquewhile: IWHILE control bloque  ;
+bloqueWhile: IWHILE control bloque  ;
 
 
 // bloques de control
-bloqueif: IIF control bloque | IIF control bloque bloqueElse;
+bloqueIf: IIF control bloque | IIF control bloque bloqueElse;
 
 bloqueElse: IELSE bloque;
 
+bloqueElseIf: bloqueIf IELSEIF control bloque (bloqueElse | bloqueElseIf) 
+| IELSEIF control bloque (bloqueElse | bloqueElseIf);
+
+bloqueSwitch: ISWITCH PA (expresion | valor) PC LA casos LC;
+
+casos: caso casos |;
+
+caso: CASE valor DP instrucciones BREAK PYC
+| CASE valor DP instrucciones BREAK PYC
+| DEFAULT DP instrucciones;
+
+valor: NUMERO | TOF | ID;
 
 
 //COMPARACIONES
