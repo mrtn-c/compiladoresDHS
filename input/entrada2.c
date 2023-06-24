@@ -27,10 +27,14 @@ int main() {
     }
 
     int age = 18;
+    
     if (age >= 18) {
         int r = 1 + 5 / 10 + 32
     } else {
         int r = 1 + 5 / 10 + 32
     }
-    return 0;
+
+    int d = ((25+2/1)*25 + 3) - (1*6);
+
+    return d;
 }

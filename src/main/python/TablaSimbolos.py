@@ -23,7 +23,7 @@ class TablaSimbolos:
         self.ts[-1][id.name] = id
 
     
-    # Devolver la ID en base a una Key
+    # Devolver la variable en base a una Key
     def returnKey(self,key):
         for context in self.ts:
             if key in context:
@@ -31,6 +31,10 @@ class TablaSimbolos:
         return False
 
 
+    # Devuelve el tamaño del arreglo (cuantos contextos hay)
+    def returnSize(self):
+        return len(self.ts)
+    
 
 # Un ID debe tener un nombre y un tipo
 # name -> identificador (nombre)

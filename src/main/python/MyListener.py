@@ -1,7 +1,7 @@
 
 from antlr4 import *
 from TablaSimbolos import TablaSimbolos
-from TablaSimbolos import Funcion 
+from TablaSimbolos import Function 
 from TablaSimbolos import Variable
 
 if "." in __name__:
@@ -14,122 +14,119 @@ class MyListener(ParseTreeListener):
     
     tablaSimbolos = TablaSimbolos()
 
-    # Enter a parse tree produced by compiladoresParser#programa.
-    def enterPrograma(self, ctx:compiladoresParser.ProgramaContext):
-        pass
+    argumentosFuncion = []
 
-    # Exit a parse tree produced by compiladoresParser#programa.
-    def exitPrograma(self, ctx:compiladoresParser.ProgramaContext):
-        pass
+    #omitimos crear un contexto al iniciar el programa 
+    #porque la TablaSimbolos ya se encuentra inicializada con el mismo
 
 
-    # Enter a parse tree produced by compiladoresParser#instrucciones.
-    def enterInstrucciones(self, ctx:compiladoresParser.InstruccionesContext):
-        pass
+    #-------------- BLOQUES -------------- 
 
-    # Exit a parse tree produced by compiladoresParser#instrucciones.
-    def exitInstrucciones(self, ctx:compiladoresParser.InstruccionesContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#instruccion.
-    def enterInstruccion(self, ctx:compiladoresParser.InstruccionContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#instruccion.
-    def exitInstruccion(self, ctx:compiladoresParser.InstruccionContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#bloque.
+    # añado un contexto al entrar a un bloque
     def enterBloque(self, ctx:compiladoresParser.BloqueContext):
-        pass
+        self.tablaSimbolos.addContext()
 
-    # Exit a parse tree produced by compiladoresParser#bloque.
+    # quito un contexto al entrar a un bloque
     def exitBloque(self, ctx:compiladoresParser.BloqueContext):
-        pass
+        self.tablaSimbolos.removeContext()
 
 
-    # Enter a parse tree produced by compiladoresParser#retorno.
-    def enterRetorno(self, ctx:compiladoresParser.RetornoContext):
-        pass
+    #-------------- PROTITIPADO DE FUNCIONES -------------- 
 
-    # Exit a parse tree produced by compiladoresParser#retorno.
-    def exitRetorno(self, ctx:compiladoresParser.RetornoContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#valor.
-    def enterValor(self, ctx:compiladoresParser.ValorContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#valor.
-    def exitValor(self, ctx:compiladoresParser.ValorContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#prototipado.
-    def enterPrototipado(self, ctx:compiladoresParser.PrototipadoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#prototipado.
     def exitPrototipado(self, ctx:compiladoresParser.PrototipadoContext):
-        pass
+        #obtengo ID
+        nombreFuncion = ctx.getChild(1)
+        #obtengo tdato
+        tipoFuncion = ctx.getChild(0).getChild(0)
+        #creo la funcion
+        function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
+        #la agrego al ultimo contexto
+        self.tablaSimbolos.ts[-1][nombreFuncion] = function
+        #limpio el buffer de argumentos
+        self.argumentosFuncion.clear()
+    
 
-
-    # Enter a parse tree produced by compiladoresParser#argumentosProto.
-    def enterArgumentosProto(self, ctx:compiladoresParser.ArgumentosProtoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#argumentosProto.
     def exitArgumentosProto(self, ctx:compiladoresParser.ArgumentosProtoContext):
-        pass
+        nombres_unicos = set()
+        for variable in self.argumentosFuncion:
+            if variable.nombreVariable in nombres_unicos:
+                # Se encontró un nombre de variable repetido
+                print(f'ERROR: redefinicion de {variable.nombreVariable} en los argumentos del prototipado de funcion')
+            else:
+                nombres_unicos.add(variable.nombreVariable)
+        
 
-
-    # Enter a parse tree produced by compiladoresParser#argumentoProto.
-    def enterArgumentoProto(self, ctx:compiladoresParser.ArgumentoProtoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#argumentoProto.
     def exitArgumentoProto(self, ctx:compiladoresParser.ArgumentoProtoContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#funcion.
+        #obtengo ID
+        nombreVariable = ctx.getChild(1)
+        #obtengo tdato
+        tipoVariable = ctx.getChild(0).getChild(0)
+        #creo la variable argumento
+        argumento = Variable(nombreVariable,tipoVariable)
+        #la agrego a la lista de argumentos
+        self.argumentosFuncion.append(argumento)
+     
+     
+    #-------------- CREACION DE FUNCIONES --------------  
+        
     def enterFuncion(self, ctx:compiladoresParser.FuncionContext):
-        pass
+        #verifico que la funcion se este declarando en el scope global (una funcion no puede declararse dentro de otra)
+        if self.tablaSimbolos.returnSize() == 1:
+            #añado el nuevo contexto de parametros de la funcion
+            self.tablaSimbolos.addContext()
+            #obtengo ID
+            nombreFuncion = ctx.getChild(1)
+            #obtengo tdato
+            tipoFuncion = ctx.getChild(0).getChild(0)
+            #creo la funcion
+            function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
+            #la agrego al ultimo contexto
+            self.tablaSimbolos.ts[-1][nombreFuncion] = function
+            #limpio el buffer de argumentos
+            self.argumentosFuncion.clear()       
+        else:
+            print("ERROR: declaracion de funcion en scope incorrecto")
 
-    # Exit a parse tree produced by compiladoresParser#funcion.
+
     def exitFuncion(self, ctx:compiladoresParser.FuncionContext):
-        pass
+        #quito el contexto de parametros de funcion
+        self.tablaSimbolos.removeContext()
 
 
-    # Enter a parse tree produced by compiladoresParser#argumentos.
-    def enterArgumentos(self, ctx:compiladoresParser.ArgumentosContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#argumentos.
     def exitArgumentos(self, ctx:compiladoresParser.ArgumentosContext):
-        pass
+        nombres_unicos = set()
+        for variable in self.argumentosFuncion:
+            if variable.nombreVariable in nombres_unicos:
+                # Se encontró un nombre de variable repetido
+                print(f'ERROR: redefinicion de {variable.nombreVariable} en los argumentos de funcion')
+            else:
+                nombres_unicos.add(variable.nombreVariable)
 
 
-    # Enter a parse tree produced by compiladoresParser#argumento.
-    def enterArgumento(self, ctx:compiladoresParser.ArgumentoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#argumento.
     def exitArgumento(self, ctx:compiladoresParser.ArgumentoContext):
-        pass
+        #obtengo ID
+        nombreVariable = ctx.getChild(1)
+        #obtengo tdato
+        tipoVariable = ctx.getChild(0).getChild(0)
+        #creo la variable argumento
+        argumento = Variable(nombreVariable,tipoVariable)
+        #la agrego a la lista de argumentos
+        self.argumentosFuncion.append(argumento)
 
 
-    # Enter a parse tree produced by compiladoresParser#llamadaFuncion.
-    def enterLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#llamadaFuncion.
+    #-------------- LLAMADA A FUNCIONES -------------- 
+    
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        pass
-
+        
+        #busco la funcion en la tabla simbolos en base al ID
+        function = self.tablaSimbolos.returnKey(ctx.getChild(0))
+        
+        if(not function):
+            print(f'ERROR: la funcion {ctx.getChild(0)} no ha sido prototipada ni declarada previamente')
+            
+ 
+            
+    #TODO: De aca para adelante
 
     # Enter a parse tree produced by compiladoresParser#parametros.
     def enterParametros(self, ctx:compiladoresParser.ParametrosContext):
@@ -138,6 +135,9 @@ class MyListener(ParseTreeListener):
     # Exit a parse tree produced by compiladoresParser#parametros.
     def exitParametros(self, ctx:compiladoresParser.ParametrosContext):
         pass
+
+
+
 
 
     # Enter a parse tree produced by compiladoresParser#bloquefor.
