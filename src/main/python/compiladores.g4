@@ -41,7 +41,6 @@ OR: '||';
 
 //tipos datos
 INT: 'int';
-DOUBLE: 'double';
 FLOAT: 'float';
 BOOL: 'bool';
 TOF: 'true' | 'false';
@@ -50,7 +49,7 @@ TOF: 'true' | 'false';
 //Estructuras de Control
 IIF: 'if';
 IELSE: 'else';
-IELSEIF: IELSE IIF;
+IELSEIF: 'else if';
 
 //Definiciones para Switch
 ISWITCH: 'switch';
@@ -89,7 +88,7 @@ ID: (LETRA | '_') ((LETRA | DIGITO | '_'))*;
 
 WS: [ \t\n\r] -> skip;
 
-
+valor: NUMERO | TOF | ID;
 
 
 /// FUNCIONES ///
@@ -137,24 +136,23 @@ bloqueWhile: IWHILE control bloque  ;
 
 
 // bloques de control
-bloqueIf: IIF control bloque | IIF control bloque bloqueElse;
+bloqueIf: IIF control bloque | IIF control bloque bloqueElse | IIF control bloque bloqueElseIf;
 
 bloqueElse: IELSE bloque;
 
-bloqueElseIf: bloqueIf IELSEIF control bloque (bloqueElse | bloqueElseIf) 
-| IELSEIF control bloque (bloqueElse | bloqueElseIf);
+bloqueElseIf: IELSEIF control bloque (bloqueElse | bloqueElseIf|);
+
+
 
 bloqueSwitch: ISWITCH PA (valor | expresion) PC LA casos LC;
 
 casos: caso casos |;
 
-
-
 caso: CASE valor DP instrucciones BREAK PYC
 | CASE valor DP instrucciones
 | DEFAULT DP instrucciones;
 
-valor: NUMERO | TOF | ID;
+      
 
 
 //COMPARACIONES
@@ -189,7 +187,7 @@ decrementoUnario: ID DECREMENTO;
 declaracion:
 	tdato ID | tdato init | tdato init declaracionConjunta | tdato ID declaracionConjunta | tdato ID ASSIG valor;
 
-tdato: INT | FLOAT | DOUBLE | BOOL;
+tdato: INT | FLOAT | BOOL;
 
 declaracionConjunta:
 	COMA ID | COMA ID declaracionConjunta | COMA init declaracionConjunta |;
@@ -203,7 +201,7 @@ asignarFuncion: ID ASSIG llamadaFuncion;
 
 
 /// OPERACION ARITMETICA ///
-oparitmeticas: oparitmetica oparitmeticas |; //potencialmente infinita
+oparitmeticas: oparitmetica oparitmeticas |;
 
 oparitmetica: expresion;
 
