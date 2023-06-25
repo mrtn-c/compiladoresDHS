@@ -124,15 +124,12 @@ parametros:
 /// BLOQUES ///
 // bloques de repeticion
 bloquefor:
-	IFOR PA (declaracion | asignacion) PYC cmp PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque //completo
-	| IFOR PA PYC PYC PYC PC //infinito
-	| IFOR PA (declaracion | asignacion) PYC PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque //for(x;;x++)
-	| IFOR PA (declaracion | asignacion) PYC cmp PYC PC bloque //for(x;x=5;)
-	| IFOR PA (declaracion | asignacion) PYC PYC PC bloque //for(x;;)
-	| IFOR PA PYC cmp PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque //sin asignacion/declaracion
-	| IFOR PA PYC PYC (asignacion | incrementoUnario | decrementoUnario) PC bloque; //for(;;x++)
+	IFOR PA (declaracion | asignacion | ) PYC (cmp | ) PYC (asignacion | incrementoUnario | decrementoUnario | ) PC bloque; //completo
 
-bloqueWhile: IWHILE control bloque  ;
+
+bloqueWhile: IWHILE control bloque ;
+
+
 
 
 // bloques de control
