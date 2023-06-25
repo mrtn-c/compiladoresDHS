@@ -44,16 +44,6 @@ class MyListener(ParseTreeListener):
         self.tablaSimbolos.ts[-1][nombreFuncion] = function
         #limpio el buffer de argumentos
         self.argumentosFuncion.clear()
-    
-
-    def exitArgumentosProto(self, ctx:compiladoresParser.ArgumentosProtoContext):
-        nombres_unicos = set()
-        for variable in self.argumentosFuncion:
-            if variable.nombreVariable in nombres_unicos:
-                # Se encontró un nombre de variable repetido
-                print(f'ERROR: redefinicion de {variable.nombreVariable} en los argumentos del prototipado de funcion')
-            else:
-                nombres_unicos.add(variable.nombreVariable)
         
 
     def exitArgumentoProto(self, ctx:compiladoresParser.ArgumentoProtoContext):
@@ -70,38 +60,23 @@ class MyListener(ParseTreeListener):
     #-------------- CREACION DE FUNCIONES --------------  
         
     def enterFuncion(self, ctx:compiladoresParser.FuncionContext):
-        #verifico que la funcion se este declarando en el scope global (una funcion no puede declararse dentro de otra)
-        if self.tablaSimbolos.returnSize() == 1:
-            #añado el nuevo contexto de parametros de la funcion
-            self.tablaSimbolos.addContext()
-            #obtengo ID
-            nombreFuncion = ctx.getChild(1)
-            #obtengo tdato
-            tipoFuncion = ctx.getChild(0).getChild(0)
-            #creo la funcion
-            function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
-            #la agrego al ultimo contexto
-            self.tablaSimbolos.ts[-1][nombreFuncion] = function
-            #limpio el buffer de argumentos
-            self.argumentosFuncion.clear()       
-        else:
-            print("ERROR: declaracion de funcion en scope incorrecto")
+        #añado el nuevo contexto de parametros de la funcion
+        self.tablaSimbolos.addContext()
 
 
     def exitFuncion(self, ctx:compiladoresParser.FuncionContext):
+        #obtengo ID
+        nombreFuncion = str(ctx.getChild(1))
+        #obtengo tdato
+        tipoFuncion = ctx.getChild(0).getChild(0)
+        #creo la funcion
+        function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
+        #la agrego al ultimo contexto
+        self.tablaSimbolos.ts[-1][nombreFuncion] = function
+        #limpio el buffer de argumentos
+        self.argumentosFuncion.clear()
         #quito el contexto de parametros de funcion
         self.tablaSimbolos.removeContext()
-
-
-    def exitArgumentos(self, ctx:compiladoresParser.ArgumentosContext):
-        nombres_unicos = set()
-        for variable in self.argumentosFuncion:
-            if variable.nombreVariable in nombres_unicos:
-                # Se encontró un nombre de variable repetido
-                print(f'ERROR: redefinicion de {variable.nombreVariable} en los argumentos de funcion')
-            else:
-                nombres_unicos.add(variable.nombreVariable)
-
 
     def exitArgumento(self, ctx:compiladoresParser.ArgumentoContext):
         #obtengo ID
@@ -117,9 +92,10 @@ class MyListener(ParseTreeListener):
     #-------------- LLAMADA A FUNCIONES -------------- 
     
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        
+        #TODO: NO FUNCIONA
         #busco la funcion en la tabla simbolos en base al ID
         function = self.tablaSimbolos.returnKey(ctx.getChild(0))
+        print(function)
         
         if(not function):
             print(f'ERROR: la funcion {ctx.getChild(0)} no ha sido prototipada ni declarada previamente')

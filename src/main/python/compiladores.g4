@@ -44,7 +44,7 @@ INT: 'int';
 FLOAT: 'float';
 BOOL: 'bool';
 TOF: 'true' | 'false';
-
+ 
 
 //Estructuras de Control
 IIF: 'if';
