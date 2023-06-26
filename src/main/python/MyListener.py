@@ -109,25 +109,24 @@ class MyListener(ParseTreeListener):
 
 
     def exitParametros(self, ctx:compiladoresParser.ParametrosContext):
-        pass
-        #tmp = ctx.getText()
-        #tmp = tmp.split(",")
-        #print(tmp)
-        #
-        #try:
-        #    if tmp[0].isdigit() or float(tmp[0]) or (tmp[0] == 'true') or (tmp[0] == 'false'):
-        #        return
-        #except:
-        #    pass
-        #
-        #if self.tablaSimbolos.returnKey(str(tmp[0])) is not False:
-        #    self.tablaSimbolos.returnKey(str(tmp[0])).used = True   
-        #      
-        #    if not self.tablaSimbolos.returnKey(str(tmp[0])).initialized:
-        #        print(f'WARNING: La variable "{str(tmp[0])}" no esta inicializada')
-        #        
-        #else:
-        #    print(f'ERROR: La variable "{str(tmp[0])}" no existe')
+        tmp = ctx.getText()
+        tmp = tmp.split(",")
+        print(tmp)
+        
+        try:
+            if tmp[0].isdigit() or float(tmp[0]) or (tmp[0] == 'true') or (tmp[0] == 'false'):
+                return
+        except:
+            pass
+        
+        if self.tablaSimbolos.returnKey(str(tmp[0])) is not False:
+            self.tablaSimbolos.returnKey(str(tmp[0])).used = True   
+              
+            if not self.tablaSimbolos.returnKey(str(tmp[0])).initialized:
+                print(f'WARNING: La variable "{str(tmp[0])}" no esta inicializada')
+                
+        else:
+            print(f'ERROR: La variable "{str(tmp[0])}" no existe')
 
 
 
@@ -255,19 +254,18 @@ class MyListener(ParseTreeListener):
 
     # Exit a parse tree produced by compiladoresParser#declaracion.
     def exitDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
-        pass
-        # #obtengo ID
-        # nombreVariable = str(ctx.getChild(1))
-        # #obtengo tdato
-        # tipoVariable = str(ctx.getChild(0).getChild(0))
-        
-        # if(ctx.getChildCount() == 2):
-        #     #creo la variable
-        #     variable = Variable(nombreVariable,tipoVariable)
-            
-        # elif (ctx.getChildCount() == 4):
-        #     valor = str(ctx.getChild(3))
-        #     print(valor)
+         #obtengo ID
+         nombreVariable = str(ctx.getChild(1))
+         #obtengo tdato
+         tipoVariable = str(ctx.getChild(0).getChild(0))
+    
+         if(ctx.getChildCount() == 2):
+             #creo la variable
+             variable = Variable(nombreVariable,tipoVariable)
+           
+         elif (ctx.getChildCount() == 4):
+             valor = str(ctx.getChild(3))
+             print(valor)
         
         
 

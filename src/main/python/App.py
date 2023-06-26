@@ -5,7 +5,7 @@ from compiladoresParser import compiladoresParser
 from MyListener import MyListener
 
 def main(argv):
-    archivo = "/home/tintin/dhs/compiladoresDHS/input/entrada.c"
+    archivo = "/home/valen/dhs-2023/compiladoresDHS/input/entrada.c"
     if len(argv) > 1 :
         archivo = argv[1]
     input = FileStream(archivo)
