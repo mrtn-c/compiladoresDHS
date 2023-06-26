@@ -1,6 +1,6 @@
-# Generated from /home/valen/dhs-2023/compiladoresDHS/src/main/python/compiladores.g4 by ANTLR 4.9.2
+# Generated from compiladores.g4 by ANTLR 4.13.0
 from antlr4 import *
-if __name__ is not None and "." in __name__:
+if "." in __name__:
     from .compiladoresParser import compiladoresParser
 else:
     from compiladoresParser import compiladoresParser
@@ -266,15 +266,6 @@ class compiladoresListener(ParseTreeListener):
 
     # Exit a parse tree produced by compiladoresParser#tdato.
     def exitTdato(self, ctx:compiladoresParser.TdatoContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#declaracionConjunta.
-    def enterDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#declaracionConjunta.
-    def exitDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
         pass
 
 

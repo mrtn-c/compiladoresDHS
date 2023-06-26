@@ -15,6 +15,8 @@ class MyListener(ParseTreeListener):
     tablaSimbolos = TablaSimbolos()
 
     argumentosFuncion = []
+    
+    parametrosFuncion = []
 
     #omitimos crear un contexto al iniciar el programa 
     #porque la TablaSimbolos ya se encuentra inicializada con el mismo
@@ -24,10 +26,12 @@ class MyListener(ParseTreeListener):
 
     # añado un contexto al entrar a un bloque
     def enterBloque(self, ctx:compiladoresParser.BloqueContext):
+        print("entro desde bloque")
         self.tablaSimbolos.addContext()
 
     # quito un contexto al entrar a un bloque
     def exitBloque(self, ctx:compiladoresParser.BloqueContext):
+        print("salida desde bloque")
         self.tablaSimbolos.removeContext()
 
 
@@ -39,7 +43,7 @@ class MyListener(ParseTreeListener):
         #obtengo tdato
         tipoFuncion = str(ctx.getChild(0).getChild(0))
         #creo la funcion
-        function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
+        function = Function(nombreFuncion, tipoFuncion, self.argumentosFuncion.copy())
         #la agrego al ultimo contexto
         self.tablaSimbolos.ts[-1][nombreFuncion] = function
         #limpio el buffer de argumentos
@@ -48,9 +52,9 @@ class MyListener(ParseTreeListener):
 
     def exitArgumentoProto(self, ctx:compiladoresParser.ArgumentoProtoContext):
         #obtengo ID
-        nombreVariable = ctx.getChild(1)
+        nombreVariable = str(ctx.getChild(1))
         #obtengo tdato
-        tipoVariable = ctx.getChild(0).getChild(0)
+        tipoVariable = str(ctx.getChild(0).getChild(0))
         #creo la variable argumento
         argumento = Variable(nombreVariable,tipoVariable)
         #la agrego a la lista de argumentos
@@ -61,6 +65,7 @@ class MyListener(ParseTreeListener):
         
     def enterFuncion(self, ctx:compiladoresParser.FuncionContext):
         #añado el nuevo contexto de parametros de la funcion
+        print("desde que entro a funcion")
         self.tablaSimbolos.addContext()
 
 
@@ -68,21 +73,24 @@ class MyListener(ParseTreeListener):
         #obtengo ID
         nombreFuncion = str(ctx.getChild(1))
         #obtengo tdato
-        tipoFuncion = ctx.getChild(0).getChild(0)
+        tipoFuncion = str(ctx.getChild(0).getChild(0))
         #creo la funcion
-        function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
+        function = Function(nombreFuncion, tipoFuncion, self.argumentosFuncion.copy())
         #la agrego al ultimo contexto
         self.tablaSimbolos.ts[-1][nombreFuncion] = function
         #limpio el buffer de argumentos
         self.argumentosFuncion.clear()
-        #quito el contexto de parametros de funcion
+        #quito el contexto de parametros de funcion        
         self.tablaSimbolos.removeContext()
+        # verifico que la funcion fue declarada en el contexto global
+        if self.tablaSimbolos.returnSize() != 1:
+            print(f'ERROR: Debes declarar la funcion {str(ctx.getChild(1))} en el contexto global')
 
     def exitArgumento(self, ctx:compiladoresParser.ArgumentoContext):
         #obtengo ID
-        nombreVariable = ctx.getChild(1)
+        nombreVariable = str(ctx.getChild(1))
         #obtengo tdato
-        tipoVariable = ctx.getChild(0).getChild(0)
+        tipoVariable = str(ctx.getChild(0).getChild(0))
         #creo la variable argumento
         argumento = Variable(nombreVariable,tipoVariable)
         #la agrego a la lista de argumentos
@@ -92,24 +100,35 @@ class MyListener(ParseTreeListener):
     #-------------- LLAMADA A FUNCIONES -------------- 
     
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        #Creo que esta ahi...
         #busco la funcion en la tabla simbolos en base al ID
-        function = self.tablaSimbolos.returnKey(ctx.getChild(0).getText())
-        print(function)
+        function = self.tablaSimbolos.returnKey(str(ctx.getChild(0)))
+
         if(not function):
-            print(f'ERROR: la funcion {ctx.getChild(0)} no ha sido prototipada ni declarada previamente')
+            print(f'ERROR: la funcion {str(ctx.getChild(0))} no ha sido prototipada ni declarada previamente')
             
- 
-            
-    #TODO: De aca para adelante
 
-    # Enter a parse tree produced by compiladoresParser#parametros.
-    def enterParametros(self, ctx:compiladoresParser.ParametrosContext):
-        self.tablaSimbolos.addContext()
 
-    # Exit a parse tree produced by compiladoresParser#parametros.
     def exitParametros(self, ctx:compiladoresParser.ParametrosContext):
         pass
+        #tmp = ctx.getText()
+        #tmp = tmp.split(",")
+        #print(tmp)
+        #
+        #try:
+        #    if tmp[0].isdigit() or float(tmp[0]) or (tmp[0] == 'true') or (tmp[0] == 'false'):
+        #        return
+        #except:
+        #    pass
+        #
+        #if self.tablaSimbolos.returnKey(str(tmp[0])) is not False:
+        #    self.tablaSimbolos.returnKey(str(tmp[0])).used = True   
+        #      
+        #    if not self.tablaSimbolos.returnKey(str(tmp[0])).initialized:
+        #        print(f'WARNING: La variable "{str(tmp[0])}" no esta inicializada')
+        #        
+        #else:
+        #    print(f'ERROR: La variable "{str(tmp[0])}" no existe')
+
 
 
 
@@ -232,33 +251,28 @@ class MyListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by compiladoresParser#declaracion.
-    def enterDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
-        pass
+    #-------------- DECLARACION DE VARIABLES -------------- 
 
     # Exit a parse tree produced by compiladoresParser#declaracion.
     def exitDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
         pass
+        # #obtengo ID
+        # nombreVariable = str(ctx.getChild(1))
+        # #obtengo tdato
+        # tipoVariable = str(ctx.getChild(0).getChild(0))
+        
+        # if(ctx.getChildCount() == 2):
+        #     #creo la variable
+        #     variable = Variable(nombreVariable,tipoVariable)
+            
+        # elif (ctx.getChildCount() == 4):
+        #     valor = str(ctx.getChild(3))
+        #     print(valor)
+        
+        
 
-
-    # Enter a parse tree produced by compiladoresParser#tdato.
-    def enterTdato(self, ctx:compiladoresParser.TdatoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#tdato.
-    def exitTdato(self, ctx:compiladoresParser.TdatoContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#declaracionConjunta.
-    def enterDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#declaracionConjunta.
-    def exitDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
-        pass
-
-
+    
+    
     # Enter a parse tree produced by compiladoresParser#init.
     def enterInit(self, ctx:compiladoresParser.InitContext):
         pass

@@ -176,22 +176,20 @@ cmp:
 
 incrementoUnario: ID INCREMENTO;
 
+
 decrementoUnario: ID DECREMENTO;
 
 
 
 //VARIABLES
 declaracion:
-	tdato ID | tdato init | tdato init declaracionConjunta | tdato ID declaracionConjunta | tdato ID ASSIG valor;
+	tdato ID  | tdato ID ASSIG valor | tdato ID ASSIG oparitmeticas | tdato ID ASSIG llamadaFuncion;
 
 tdato: INT | FLOAT | BOOL;
 
-declaracionConjunta:
-	COMA ID | COMA ID declaracionConjunta | COMA init declaracionConjunta |;
+init: ID ASSIG valor | ID ASSIG oparitmeticas | ID ASSIG llamadaFuncion;
 
-init: ID ASSIG NUMERO | ID ASSIG oparitmeticas | ID ASSIG llamadaFuncion;
-
-asignacion: ID ASSIG NUMERO | ID ASSIG oparitmeticas;
+asignacion: init;
 
 asignarFuncion: ID ASSIG llamadaFuncion;
 
@@ -199,6 +197,7 @@ asignarFuncion: ID ASSIG llamadaFuncion;
 
 /// OPERACION ARITMETICA ///
 oparitmeticas: oparitmetica oparitmeticas |;
+
 
 oparitmetica: expresion;
 
@@ -209,5 +208,6 @@ termino: factor f;
 terminos: SUMA termino terminos | REST termino terminos |;
 
 factor: ID | NUMERO | PA expresion PC;
+
 
 f: MULT factor f | DIV factor f |;
