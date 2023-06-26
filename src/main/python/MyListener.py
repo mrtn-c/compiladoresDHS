@@ -26,12 +26,10 @@ class MyListener(ParseTreeListener):
 
     # añado un contexto al entrar a un bloque
     def enterBloque(self, ctx:compiladoresParser.BloqueContext):
-        print("entro desde bloque")
         self.tablaSimbolos.addContext()
 
     # quito un contexto al entrar a un bloque
     def exitBloque(self, ctx:compiladoresParser.BloqueContext):
-        print("salida desde bloque")
         self.tablaSimbolos.removeContext()
 
 
@@ -61,11 +59,10 @@ class MyListener(ParseTreeListener):
         self.argumentosFuncion.append(argumento)
      
      
-    #-------------- CREACION DE FUNCIONES --------------  
-        
+    #-------------- DECLARACION DE FUNCIONES --------------  
+
     def enterFuncion(self, ctx:compiladoresParser.FuncionContext):
         #añado el nuevo contexto de parametros de la funcion
-        print("desde que entro a funcion")
         self.tablaSimbolos.addContext()
 
 
@@ -76,8 +73,10 @@ class MyListener(ParseTreeListener):
         tipoFuncion = str(ctx.getChild(0).getChild(0))
         #creo la funcion
         function = Function(nombreFuncion, tipoFuncion, self.argumentosFuncion.copy())
+        #indico que la funcion fue declarada
+        function.is_initialized = True
         #la agrego al ultimo contexto
-        self.tablaSimbolos.ts[-1][nombreFuncion] = function
+        self.tablaSimbolos.ts[-2][nombreFuncion] = function
         #limpio el buffer de argumentos
         self.argumentosFuncion.clear()
         #quito el contexto de parametros de funcion        
@@ -93,6 +92,10 @@ class MyListener(ParseTreeListener):
         tipoVariable = str(ctx.getChild(0).getChild(0))
         #creo la variable argumento
         argumento = Variable(nombreVariable,tipoVariable)
+        #le pongo el estado de inicializada
+        argumento.is_initialized = True
+        #la agrego al contexto de parametros de funcion
+        self.tablaSimbolos.ts[-1][nombreVariable] = argumento
         #la agrego a la lista de argumentos
         self.argumentosFuncion.append(argumento)
 
@@ -100,29 +103,38 @@ class MyListener(ParseTreeListener):
     #-------------- LLAMADA A FUNCIONES -------------- 
     
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
+        
         #busco la funcion en la tabla simbolos en base al ID
         function = self.tablaSimbolos.returnKey(str(ctx.getChild(0)))
 
         if(not function):
             print(f'ERROR: la funcion {str(ctx.getChild(0))} no ha sido prototipada ni declarada previamente')
+         
+        self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_used = True    
             
 
 
     def exitParametros(self, ctx:compiladoresParser.ParametrosContext):
         tmp = ctx.getText()
         tmp = tmp.split(",")
-        print(tmp)
         
         try:
-            if tmp[0].isdigit() or float(tmp[0]) or (tmp[0] == 'true') or (tmp[0] == 'false'):
+            if tmp[0].isdigit() or float(tmp[0]):
                 return
-        except:
+        except Exception as e:
             pass
         
+        try:
+            if (str(tmp[0]) == 'true') or (str(tmp[0]) == 'false'):
+                return
+        except Exception as e:
+            pass
+
+
         if self.tablaSimbolos.returnKey(str(tmp[0])) is not False:
-            self.tablaSimbolos.returnKey(str(tmp[0])).used = True   
+            self.tablaSimbolos.returnKey(str(tmp[0])).is_used = True   
               
-            if not self.tablaSimbolos.returnKey(str(tmp[0])).initialized:
+            if not self.tablaSimbolos.returnKey(str(tmp[0])).is_initialized:
                 print(f'WARNING: La variable "{str(tmp[0])}" no esta inicializada')
                 
         else:
@@ -232,133 +244,88 @@ class MyListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by compiladoresParser#incrementoUnario.
-    def enterIncrementoUnario(self, ctx:compiladoresParser.IncrementoUnarioContext):
-        pass
 
-    # Exit a parse tree produced by compiladoresParser#incrementoUnario.
+
     def exitIncrementoUnario(self, ctx:compiladoresParser.IncrementoUnarioContext):
-        pass
+        #verifico si la variable existe
+        if self.tablaSimbolos.returnKey(str(ctx.getChild(0))) != False:
+            #verifico si fue inicializada
+            if self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_initialized == True:
+                pass
+            else:
+                print(f'ERROR: La variable "{str(ctx.getChild(0))}" no fue inicializada')
+        else:
+            print(f'ERROR: La variable "{str(ctx.getChild(0))}" no existe')
 
 
-    # Enter a parse tree produced by compiladoresParser#decrementoUnario.
-    def enterDecrementoUnario(self, ctx:compiladoresParser.DecrementoUnarioContext):
-        pass
 
-    # Exit a parse tree produced by compiladoresParser#decrementoUnario.
     def exitDecrementoUnario(self, ctx:compiladoresParser.DecrementoUnarioContext):
-        pass
+        #verifico si la variable existe
+        if self.tablaSimbolos.returnKey(str(ctx.getChild(0))) != False:
+            #verifico si fue inicializada
+            if self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_initialized == True:
+                pass
+            else:
+                print(f'ERROR: La variable "{str(ctx.getChild(0))}" no fue inicializada')
+        else:
+            print(f'ERROR: La variable "{str(ctx.getChild(0))}" no existe')
 
 
-    #-------------- DECLARACION DE VARIABLES -------------- 
+    #-------------- DECLARACION e INICIALIZACION DE VARIABLES -------------- 
 
-    # Exit a parse tree produced by compiladoresParser#declaracion.
     def exitDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
-         #obtengo ID
-         nombreVariable = str(ctx.getChild(1))
-         #obtengo tdato
-         tipoVariable = str(ctx.getChild(0).getChild(0))
-    
-         if(ctx.getChildCount() == 2):
-             #creo la variable
-             variable = Variable(nombreVariable,tipoVariable)
-           
-         elif (ctx.getChildCount() == 4):
-             valor = str(ctx.getChild(3))
-             print(valor)
+        #obtengo ID
+        nombreVariable = str(ctx.getChild(1))
+        #obtengo tdato
+        tipoVariable = str(ctx.getChild(0).getChild(0))
+
+        #genero objeto variable
+        variable = Variable(nombreVariable,tipoVariable)
+
+        #verifico si fue inicializada
+        if (ctx.getChildCount() == 4):
+            #marco la variable como inicializada
+            variable.is_initialized = True
+
+        self.tablaSimbolos.ts[-1][nombreVariable] = variable
         
         
 
-    
-    
-    # Enter a parse tree produced by compiladoresParser#init.
-    def enterInit(self, ctx:compiladoresParser.InitContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#init.
     def exitInit(self, ctx:compiladoresParser.InitContext):
-        pass
+        #verifico si la variable existe
+        if self.tablaSimbolos.returnKey(str(ctx.getChild(0))) != False:
+            #le cambio el estado a usada
+            self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_initialized = True
+        else:
+            print(f'ERROR: La variable "{str(ctx.getChild(0))}" no existe')
 
 
-    # Enter a parse tree produced by compiladoresParser#asignacion.
-    def enterAsignacion(self, ctx:compiladoresParser.AsignacionContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#asignacion.
-    def exitAsignacion(self, ctx:compiladoresParser.AsignacionContext):
-        pass
 
 
-    # Enter a parse tree produced by compiladoresParser#asignarFuncion.
-    def enterAsignarFuncion(self, ctx:compiladoresParser.AsignarFuncionContext):
-        pass
 
-    # Exit a parse tree produced by compiladoresParser#asignarFuncion.
-    def exitAsignarFuncion(self, ctx:compiladoresParser.AsignarFuncionContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#oparitmeticas.
-    def enterOparitmeticas(self, ctx:compiladoresParser.OparitmeticasContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#oparitmeticas.
-    def exitOparitmeticas(self, ctx:compiladoresParser.OparitmeticasContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#oparitmetica.
-    def enterOparitmetica(self, ctx:compiladoresParser.OparitmeticaContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#oparitmetica.
-    def exitOparitmetica(self, ctx:compiladoresParser.OparitmeticaContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#expresion.
-    def enterExpresion(self, ctx:compiladoresParser.ExpresionContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#expresion.
-    def exitExpresion(self, ctx:compiladoresParser.ExpresionContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#termino.
-    def enterTermino(self, ctx:compiladoresParser.TerminoContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#termino.
-    def exitTermino(self, ctx:compiladoresParser.TerminoContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#terminos.
-    def enterTerminos(self, ctx:compiladoresParser.TerminosContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#terminos.
-    def exitTerminos(self, ctx:compiladoresParser.TerminosContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#factor.
-    def enterFactor(self, ctx:compiladoresParser.FactorContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#factor.
+    #-------------- OPERACIONES ARITMETICAS -------------- 
     def exitFactor(self, ctx:compiladoresParser.FactorContext):
-        pass
-
-
-    # Enter a parse tree produced by compiladoresParser#f.
-    def enterF(self, ctx:compiladoresParser.FContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#f.
-    def exitF(self, ctx:compiladoresParser.FContext):
-        pass
+        
+        #caso de id o numero
+        if(ctx.getChildCount()==1):
+            
+            #obtengo id o numero
+            id = str(ctx.getChild(0))
+            
+            try:
+                id.isdigit() or float(id)
+                return
+            except:
+                #verifico si la variable existe
+                if self.tablaSimbolos.returnKey(str(ctx.getChild(0))) != False:
+                    #verifico si fue inicializada
+                    if self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_initialized == True:
+                        #le cambio el estado a usada
+                        self.tablaSimbolos.returnKey(str(ctx.getChild(0))).is_used = True
+                    else:
+                        print(f'ERROR: La variable "{str(ctx.getChild(0))}" no fue inicializada')
+                else:
+                    print(f'ERROR: La variable "{str(ctx.getChild(0))}" no existe')
 
 
 
