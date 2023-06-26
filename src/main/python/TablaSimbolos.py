@@ -25,7 +25,9 @@ class TablaSimbolos:
     
     # Devolver la variable en base a una Key
     def returnKey(self,key):
+        print(len(self.ts))
         for context in self.ts:
+            print(context.keys())
             if key in context:
                 return context[key]
         return False

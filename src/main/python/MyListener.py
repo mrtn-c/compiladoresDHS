@@ -35,9 +35,9 @@ class MyListener(ParseTreeListener):
 
     def exitPrototipado(self, ctx:compiladoresParser.PrototipadoContext):
         #obtengo ID
-        nombreFuncion = ctx.getChild(1)
+        nombreFuncion = str(ctx.getChild(1))
         #obtengo tdato
-        tipoFuncion = ctx.getChild(0).getChild(0)
+        tipoFuncion = str(ctx.getChild(0).getChild(0))
         #creo la funcion
         function = Function(nombreFuncion, tipoFuncion,self.argumentosFuncion.copy())
         #la agrego al ultimo contexto
@@ -92,11 +92,10 @@ class MyListener(ParseTreeListener):
     #-------------- LLAMADA A FUNCIONES -------------- 
     
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        #TODO: NO FUNCIONA
+        #Creo que esta ahi...
         #busco la funcion en la tabla simbolos en base al ID
-        function = self.tablaSimbolos.returnKey(ctx.getChild(0))
+        function = self.tablaSimbolos.returnKey(ctx.getChild(0).getText())
         print(function)
-        
         if(not function):
             print(f'ERROR: la funcion {ctx.getChild(0)} no ha sido prototipada ni declarada previamente')
             
@@ -106,7 +105,7 @@ class MyListener(ParseTreeListener):
 
     # Enter a parse tree produced by compiladoresParser#parametros.
     def enterParametros(self, ctx:compiladoresParser.ParametrosContext):
-        pass
+        self.tablaSimbolos.addContext()
 
     # Exit a parse tree produced by compiladoresParser#parametros.
     def exitParametros(self, ctx:compiladoresParser.ParametrosContext):

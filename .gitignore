@@ -6,3 +6,4 @@ compiladores*.java
 *.out
 *.class
 /src/main/python/env/*
+env
