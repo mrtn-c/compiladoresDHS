@@ -1,4 +1,4 @@
-[{}, {'x': <TablaSimbolos.Variable object at 0x7fb5cc2f2800>, 'y': <TablaSimbolos.Variable object at 0x7fb5cc2f1cc0>}, {}]
-[{}, {'x': <TablaSimbolos.Variable object at 0x7fb5cc2f2800>, 'y': <TablaSimbolos.Variable object at 0x7fb5cc2f1cc0>}]
-[{'suma': <TablaSimbolos.Function object at 0x7fb5cc2f1180>}, {}, {'y': <TablaSimbolos.Variable object at 0x7fb5cc2e1570>}]
-[{'suma': <TablaSimbolos.Function object at 0x7fb5cc2f1180>}, {}]
+[{}, {'x': <TablaSimbolos.Variable object at 0x7f940b35a2c0>, 'y': <TablaSimbolos.Variable object at 0x7f940b359810>}, {'c': <TablaSimbolos.Variable object at 0x7f940b354730>}]
+[{}, {'x': <TablaSimbolos.Variable object at 0x7f940b35a2c0>, 'y': <TablaSimbolos.Variable object at 0x7f940b359810>}]
+[{'suma': <TablaSimbolos.Function object at 0x7f940b354730>}, {}, {'z': <TablaSimbolos.Variable object at 0x7f940b359120>}]
+[{'suma': <TablaSimbolos.Function object at 0x7f940b354730>}, {}]

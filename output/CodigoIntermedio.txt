@@ -1,27 +1,15 @@
 goto MAIN 
+
 LBL SUMA 
 POP x 
 POP y 
-PUSH x
-JMP tmp0
+t0=y
+t1=x
+t1=t1+t0
+c = t1
+return c
+
 
 LBL MAIN 
+return z
 
-PUSH x
-PUSH y
-PUSH tmp0
-JMP suma
-
-
-PUSH x
-PUSH y
-PUSH tmp1
-funcion = LBL tmp0
-JMP suma
-
-
-y
-t0=r*5
-t1=r
-t1=t1+t0
-z

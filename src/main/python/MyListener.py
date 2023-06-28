@@ -147,6 +147,29 @@ class MyListener(ParseTreeListener):
         self.argumentosFuncion.append(argumento)
 
 
+    def exitRetorno(self, ctx:compiladoresParser.RetornoContext):
+        #return solo
+        if(ctx.getChildCount()==1):
+            return
+        
+        #return con un id o un numero
+        if(ctx.getChild(1).getChildCount()==0):
+            try:
+                if(str(ctx.getChild(1)).isdigit() or float(str(ctx.getChild(1)))):
+                    pass
+            except Exception as e:
+                #verifico si la variable existe
+                if self.tablaSimbolos.returnKey(str(ctx.getChild(1))) != False:
+                    #le cambio el estado a usada
+                    self.tablaSimbolos.returnKey(str(ctx.getChild(1))).is_used = True
+                else:
+                    print(f'ERROR: La variable "{str(ctx.getChild(1))}" no existe')
+                
+        #en caso sea op aritmetica el hijo se encarga    
+            
+            
+            
+
     #-------------- LLAMADA A FUNCIONES -------------- 
     
     def exitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
@@ -193,6 +216,7 @@ class MyListener(ParseTreeListener):
 
 
         #-------------- RELACIONADO A BLOQUES LOGICOS -------------- 
+        
     def enterBloquefor(self, ctx:compiladoresParser.BloqueforContext):
         #añado el nuevo contexto de parametros del bloque for
         self.tablaSimbolos.addContext()

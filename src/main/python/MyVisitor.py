@@ -11,7 +11,6 @@ class MyVisitor(ParseTreeVisitor):
 
     jump_from_function_call = ""
     hay_return = False
-    contador = 0
     asignacion = False
     tmp = 0
     rollback = False
@@ -48,15 +47,19 @@ class MyVisitor(ParseTreeVisitor):
     def visitRetorno(self, ctx:compiladoresParser.RetornoContext):
         #Return solo.
         if ctx.getChildCount == 1:
-            pass 
+            self.file.write("return\n") 
         #Operacion aritmetica
         elif(ctx.getChild(1).getChildCount() > 0):
-            self.visitChilden(ctx)
+            self.visitChildren(ctx)
+            self.file.write("return t"  + str(self.tmp) + "\n" + "\n")
+            self.tmp=0 
         #ID / NUMERO
         elif(ctx.getChild(1).getChildCount() == 0):
-            self.file.write("PUSH "  + str(ctx.getChild(1)) + "\n")
-        
-        self.file.write("JMP " + str(self.jump_from_function_call) + "\n")    
+            if(self.tmp != 0):
+                self.file.write("return t"  + str(self.tmp) + "\n" + "\n")
+                self.tmp=0
+            else:
+                self.file.write("return "  + str(ctx.getChild(1)) + "\n" + "\n")
         
 
 
@@ -81,12 +84,10 @@ class MyVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-
-
     # Visit a parse tree produced by compiladoresParser#funcion.
     def visitFuncion(self, ctx:compiladoresParser.FuncionContext):
         nombreFuncion = str(ctx.getChild(1)).upper()
-        self.file.write(f'LBL {nombreFuncion} \n')
+        self.file.write(f'\nLBL {nombreFuncion} \n')
         return self.visitChildren(ctx)
 
 
@@ -100,25 +101,15 @@ class MyVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by compiladoresParser#llamadaFuncion.
     def visitLlamadaFuncion(self, ctx:compiladoresParser.LlamadaFuncionContext):
-        
+        self.file.write("CALL " +str(ctx.getChild(0)))
         self.visitChildren(ctx)
-        self.file.write("PUSH " + "tmp"+ str(self.contador) + "\n")
-        
-        
-        self.contador += 1
-        
-        self.file.write("JMP " + str(ctx.getChild(0)) + "\n")
-
-
-
-
 
 
     # Visit a parse tree produced by compiladoresParser#parametros.
     def visitParametros(self, ctx:compiladoresParser.ParametrosContext):
-        self.file.write("PUSH " + str(ctx.getChild(0))+ "\n") #siempre termina en un numero, ToF o ID.
-        return self.visitChildren(ctx)
-    
+        self.file.write(", " + str(ctx.getChild(0))) #siempre termina en un numero, ToF o ID.
+        self.visitChildren(ctx)
+        self.file.write("\n")
     
 
 
@@ -191,9 +182,26 @@ class MyVisitor(ParseTreeVisitor):
 
     #-------------- DECLARACION e INICIALIZACION DE VARIABLES --------------
 
-    # Visit a parse tree produced by compiladoresParser#declaracion.
     def visitDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
-        return self.visitChildren(ctx)
+        
+        # si hay mas de 2 hijos es porque hay valor, oparitmetica o llamada a funcion
+        if(ctx.getChildCount() > 2):
+            self.asignacion = True
+            self.rollback = False
+                 
+            # llamada a funcion
+            if(ctx.getChild(3).getChildCount() > 2):
+                self.file.write(str(ctx.getChild(1))+" = ")
+                self.visitChildren(ctx)
+            # Operacion aritmetica    
+            elif(ctx.getChild(3).getChildCount() == 2):
+                self.visitChildren(ctx)
+                self.file.write(str(ctx.getChild(1))+" = "+ "t"+str(self.tmp)+"\n")
+                self.tmp = 0
+            #Valor
+            elif(ctx.getChild(3).getChildCount() == 1):
+                self.file.write(str(ctx.getChild(1))+" = "+str(ctx.getChild(3).getChild(0))+"\n")
+        
 
 
     # Visit a parse tree produced by compiladoresParser#tdato.
@@ -203,17 +211,24 @@ class MyVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by compiladoresParser#init.
     def visitInit(self, ctx:compiladoresParser.InitContext):
+        
         self.asignacion = True
               
         self.rollback = False
         
         #Operacion aritmetica o llamada a funcion
-        if(ctx.getChild(2).getChildCount() > 1):
+        
+         # llamada a funcion
+        if(ctx.getChild(2).getChildCount() > 2):
+            self.file.write(str(ctx.getChild(0))+" = ")
             self.visitChildren(ctx)
-            self.file.write(str(ctx.getChild(0))+ "" + "\n")
-        #Valor
+        # Operacion aritmetica    
+        elif(ctx.getChild(2).getChildCount() == 2):
+            self.visitChildren(ctx)
+            self.file.write(str(ctx.getChild(0))+" = "+ "t"+str(self.tmp)+"\n")
+            self.tmp = 0
         elif(ctx.getChild(2).getChildCount() == 1):
-            self.file.write("PUSH " + str(ctx.getChild(1)) + "\n")
+            self.file.write(str(ctx.getChild(0))+" = "+str(ctx.getChild(2).getChild(0))+"\n")
 
         
 
@@ -260,12 +275,10 @@ class MyVisitor(ParseTreeVisitor):
         self.visitChildren(ctx)
         
         if ctx.getChildCount() and not self.rollback:
-            print("HGOLALFAS")
             self.file.write("t" + str(self.tmp) + "=" + ctx.getChild(1).getText() + "\n")
             self.tmp = self.tmp + 1
             
         elif self.rollback and ctx.getChildCount():
-            print("segundo asjhdoasjdo")
             self.file.write("t" + str(self.tmp + 1) + "=" + "t" + str(self.tmp + 1))
             self.file.write(ctx.getChild(0).getText() + "t" + str(self.tmp) + "\n")
             self.tmp = self.tmp + 1

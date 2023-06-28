@@ -1,13 +1,11 @@
+
 int suma(int x, int y){
-    return x;
+    int c = x + y; 
+    return c;
 }
 
 
 int main() {
-    
-    int y;
-
-    y = suma(x,y);
-
-    z = r + r * 5; 
+    int z;
+    return z; 
 }

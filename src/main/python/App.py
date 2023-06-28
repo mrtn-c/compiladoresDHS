@@ -6,7 +6,7 @@ from MyListener import MyListener
 from MyVisitor import MyVisitor
 
 def main(argv):
-    archivo = "/home/tintin/dhs/compiladoresDHS/input/entrada.c"
+    archivo = "./input/entrada.c"
     if len(argv) > 1 :
         archivo = argv[1]
     input = FileStream(archivo)
