@@ -269,15 +269,6 @@ class compiladoresListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by compiladoresParser#declaracionConjunta.
-    def enterDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
-        pass
-
-    # Exit a parse tree produced by compiladoresParser#declaracionConjunta.
-    def exitDeclaracionConjunta(self, ctx:compiladoresParser.DeclaracionConjuntaContext):
-        pass
-
-
     # Enter a parse tree produced by compiladoresParser#init.
     def enterInit(self, ctx:compiladoresParser.InitContext):
         pass

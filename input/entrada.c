@@ -1,13 +1,26 @@
-int suma(int a, int b);
 
-int main() {
-    int num1 = 5;
-    int num2 = 10;
-    int resultado = suma(num1, num2); 
-
-    return 0;
+int suma(int x, int y){
+    int c = x + y; 
+    return c;
 }
 
-int suma(int a, int b) {
-    return a + b;
+
+int main() {
+    int x = 0;
+    int b = 5;
+
+    for(int i = 0; i > 10; i++){
+        int q = 5;
+        int v = 4 * 3;
+        int w;
+        w = suma(q,v);
+    }
+
+    while(x > 10) {
+        x++;
+    }
+
+    if(x < 10) {
+        int o = suma(x,b);
+    }
 }

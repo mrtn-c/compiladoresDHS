@@ -25,9 +25,7 @@ class TablaSimbolos:
     
     # Devolver la variable en base a una Key
     def returnKey(self,key):
-        print(len(self.ts))
         for context in self.ts:
-            print(context.keys())
             if key in context:
                 return context[key]
         return False
@@ -47,7 +45,7 @@ class Id:
         self.type = type
         self.is_initialized = False
         self.is_used = False
-        self.typeId = ""
+        self.typeId = "variable"
         
     def toString(self):
         return f'(name->{self.name},\ntype->{self.type},\nis_initialized->{self.is_initialized},\nis_used->{self.is_used},\ntypeId->{self.typeId})\n'
@@ -64,7 +62,8 @@ class Function(Id):
         super().__init__(name, type)
         self.parameters = parameters
         self.typeId = "function"
+        self.is_declared = True
 
     def toString(self):
-        return f'(name->{self.name},\ntype->{self.type},\nis_initialized->{self.is_initialized},\nis_used->{self.is_used},\nparameters->{self.parameters},\ntypeId->{self.typeId})\n'
+        return f'(name->{self.name},\ntype->{self.type},\nis_initialized->{self.is_initialized},\nis_used->{self.is_used},\nparameters->{self.parameters},\nis_declared->{self.is_declared},\ntypeId->{self.typeId})\n'
         
