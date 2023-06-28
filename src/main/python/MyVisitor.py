@@ -14,6 +14,7 @@ class MyVisitor(ParseTreeVisitor):
     asignacion = False
     tmp = 0
     rollback = False
+    tmpFor = 0
 
 
     # Visit a parse tree produced by compiladoresParser#programa.
@@ -23,7 +24,7 @@ class MyVisitor(ParseTreeVisitor):
         self.file.write("goto MAIN \n")
         #Tengo arbol completo, visito hijos...
         self.visitChildren(ctx)
-        print("salio del programa.")
+        self.file.write("EOF")
         #cierro archivo.
         self.file.close()
 
@@ -51,15 +52,15 @@ class MyVisitor(ParseTreeVisitor):
         #Operacion aritmetica
         elif(ctx.getChild(1).getChildCount() > 0):
             self.visitChildren(ctx)
-            self.file.write("return t"  + str(self.tmp) + "\n" + "\n")
+            self.file.write("return t"  + str(self.tmp) + "\n")
             self.tmp=0 
         #ID / NUMERO
         elif(ctx.getChild(1).getChildCount() == 0):
             if(self.tmp != 0):
-                self.file.write("return t"  + str(self.tmp) + "\n" + "\n")
+                self.file.write("return t"  + str(self.tmp) + "\n")
                 self.tmp=0
             else:
-                self.file.write("return "  + str(ctx.getChild(1)) + "\n" + "\n")
+                self.file.write("return "  + str(ctx.getChild(1))+ "\n")
         
 
 
@@ -112,20 +113,58 @@ class MyVisitor(ParseTreeVisitor):
         self.file.write("\n")
     
 
+    #-------------- ESTRUCTURAS --------------
+
 
     # Visit a parse tree produced by compiladoresParser#bloquefor.
     def visitBloquefor(self, ctx:compiladoresParser.BloqueforContext):
-        return self.visitChildren(ctx)
+        self.file.write("LBL FOR-"+str(self.tmpFor)+"\n")
+        #declaracion o asignacion
+        self.visit(ctx.getChild(2))
+        #comparacion
+        self.visit(ctx.getChild(4))
+        self.file.write("if temp" + str(self.tmpFor) + " goto ENDFOR-"+str(self.tmpFor)+"\n")
+        #entrar al bloque del for
+        self.visitChildren(ctx.getChild(8))
+        #incremento o decremento unitario
+        self.visit(ctx.getChild(6))
+        self.file.write("GOTO FOR-"+str(self.tmpFor)+"\n")
+        self.file.write("LBL ENDFOR-"+str(self.tmpFor)+"\n")
+        self.tmpFor += 1
+
 
 
     # Visit a parse tree produced by compiladoresParser#bloqueWhile.
     def visitBloqueWhile(self, ctx:compiladoresParser.BloqueWhileContext):
-        return self.visitChildren(ctx)
+        self.file.write("LBL WHILE-"+str(self.tmpFor)+"\n")
+
+        #comparacion
+        self.visit(ctx.getChild(1))
+
+        self.file.write("if temp" + str(self.tmpFor) + " goto ENDWHILE-"+str(self.tmpFor)+"\n")
+        
+        #entrar al bloque del while
+        self.visitChildren(ctx.getChild(2))
+
+      
+        self.file.write("GOTO WHILE-"+str(self.tmpFor)+"\n")
+        self.file.write("LBL ENDWHILE-"+str(self.tmpFor)+"\n")
+        self.tmpFor += 1
 
 
     # Visit a parse tree produced by compiladoresParser#bloqueIf.
     def visitBloqueIf(self, ctx:compiladoresParser.BloqueIfContext):
-        return self.visitChildren(ctx)
+
+        #comparacion
+        self.visit(ctx.getChild(1))
+
+        self.file.write("if temp"+ str(self.tmpFor) + " goto ENDIF-"+str(self.tmpFor)+"\n")
+        
+        #entrar al bloque del while
+        self.visitChildren(ctx.getChild(2))
+        
+        self.file.write("LBL ENDIF-"+str(self.tmpFor)+"\n")
+        self.tmpFor += 1
 
 
     # Visit a parse tree produced by compiladoresParser#bloqueElse.
@@ -165,16 +204,22 @@ class MyVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by compiladoresParser#cmp.
     def visitCmp(self, ctx:compiladoresParser.CmpContext):
+        cmp = ctx.getText()
+        self.file.write("temp" + str(self.tmpFor) + " = "  + str(cmp)+"\n")
         return self.visitChildren(ctx)
+
+    #-------------- INCREMENTO O DECREMENTO UNITARIO --------------
 
 
     # Visit a parse tree produced by compiladoresParser#incrementoUnario.
     def visitIncrementoUnario(self, ctx:compiladoresParser.IncrementoUnarioContext):
+        self.file.write(str(ctx.getChild(0)) + "= "+ str(ctx.getChild(0))+ " + 1"+"\n")
         return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by compiladoresParser#decrementoUnario.
     def visitDecrementoUnario(self, ctx:compiladoresParser.DecrementoUnarioContext):
+        self.file.write(str(ctx.getChild(0)) + "= "+ str(ctx.getChild(0))+ " - 1"+"\n")
         return self.visitChildren(ctx)
 
 
@@ -183,7 +228,6 @@ class MyVisitor(ParseTreeVisitor):
     #-------------- DECLARACION e INICIALIZACION DE VARIABLES --------------
 
     def visitDeclaracion(self, ctx:compiladoresParser.DeclaracionContext):
-        
         # si hay mas de 2 hijos es porque hay valor, oparitmetica o llamada a funcion
         if(ctx.getChildCount() > 2):
             self.asignacion = True

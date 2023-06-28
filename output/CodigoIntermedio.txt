@@ -9,7 +9,30 @@ t1=t1+t0
 c = t1
 return c
 
-
 LBL MAIN 
-return z
+x = 0
+b = 5
+LBL FOR-0
+i = 0
+temp0 = i>10
+if temp0 goto ENDFOR-0
+q = 5
+t0=4*3
+v = t0
+w = CALL suma, q, v
 
+i= i + 1
+GOTO FOR-0
+LBL ENDFOR-0
+LBL WHILE-1
+temp1 = x>10
+if temp1 goto ENDWHILE-1
+x= x + 1
+GOTO WHILE-1
+LBL ENDWHILE-1
+temp2 = x<10
+if temp2 goto ENDIF-2
+o = CALL suma, x, b
+
+LBL ENDIF-2
+EOF
